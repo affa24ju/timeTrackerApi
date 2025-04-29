@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,16 @@ public class CategoryController {
     @GetMapping
     public List<Category> getAllCategories(){
         return categoryRepository.findAll();
+    }
+
+    @PutMapping("/{id}")
+    public Category updateCategory(@PathVariable String id, @RequestBody Category updatedCategory){
+        return categoryRepository.findById(id)
+            .map(existingCategory -> {
+                existingCategory.setName(updatedCategory.getName());
+                return categoryRepository.save(existingCategory);
+            })
+            .orElseThrow(() -> new RuntimeException("Kategori hittades inte med id: " + id));
     }
     
 }
