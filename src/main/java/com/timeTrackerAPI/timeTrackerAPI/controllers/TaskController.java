@@ -3,7 +3,9 @@ package com.timeTrackerAPI.timeTrackerAPI.controllers;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.timeTrackerAPI.timeTrackerAPI.models.Category;
 import com.timeTrackerAPI.timeTrackerAPI.models.Task;
+import com.timeTrackerAPI.timeTrackerAPI.models.WeeklyCategoryStat;
+import com.timeTrackerAPI.timeTrackerAPI.repositories.CategoryRepository;
 import com.timeTrackerAPI.timeTrackerAPI.repositories.TaskRepository;
 
 @RestController
@@ -24,6 +29,8 @@ public class TaskController {
 
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     //Check in för task
     @PostMapping("/checkin")
@@ -52,6 +59,39 @@ public class TaskController {
         LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY)).withHour(23).withMinute(59);
 
         return taskRepository.findByStartTimeBetween(startOfWeek, endOfWeek);
+    }
+
+    //Visa statistik på hur många minuter per task i veckan
+    @GetMapping("/stats/week")
+    public List<WeeklyCategoryStat> getWeeklyStats(){
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).withHour(0).withMinute(0);
+        LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY)).withHour(23).withMinute(59);
+
+        List<Task> tasks = taskRepository.findByStartTimeBetween(startOfWeek, endOfWeek);
+
+        //Gruppera & summera tid per kategori
+        Map<String, Long> minutesPerCategoryId = tasks.stream()
+            .filter(task -> task.getEndTime() != null) //Tar bara avslutade task
+            .collect(Collectors.groupingBy(
+                Task::getCategoryId,
+                Collectors.summingLong(task ->
+                    java.time.Duration.between(task.getStartTime(), task.getEndTime()).toMinutes()
+                    )
+            ));
+
+        //Hämtar namn för varje kategoi-id
+        return minutesPerCategoryId.entrySet().stream()
+            .map(entry -> {
+                String categoryId = entry.getKey();
+                String categoryName = categoryRepository.findById(categoryId)
+                    .map(Category::getName)
+                    .orElse("Ökänd kategori");
+
+                return new WeeklyCategoryStat(categoryName, entry.getValue());
+            })
+            .collect(Collectors.toList());
+
     }
 
 }
