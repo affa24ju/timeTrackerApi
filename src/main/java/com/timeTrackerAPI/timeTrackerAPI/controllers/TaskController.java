@@ -48,7 +48,7 @@ public class TaskController {
             task.setEndTime(LocalDateTime.now());
             return taskRepository.save(task);
         }
-        throw new RuntimeException("Task not found with id: " + id);
+        throw new RuntimeException("Uppgift hittades inte med id: " + id);
     }
 
     //Hämtar alla denna veckans tasks
