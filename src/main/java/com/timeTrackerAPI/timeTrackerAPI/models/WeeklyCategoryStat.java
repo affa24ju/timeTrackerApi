@@ -12,13 +12,23 @@ public class WeeklyCategoryStat {
         this.minutes = minutes;
     }
 
-    //Getters
+    //Getters & setters
     public long getMinutes() {
         return minutes;
     }
 
     public String getCategoryName() {
         return categoryName;
-    } 
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public void setMinutes(long minutes) {
+        this.minutes = minutes;
+    }
+    
+    
         
 }
