@@ -38,14 +38,14 @@ public class TaskController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    //Check in för task
+    //Checka in för en uppgift
     @PostMapping("/checkin")
     public Task checkIn(@RequestBody Task task){
         task.setStartTime(LocalDateTime.now());
         return taskRepository.save(task);
     }
     
-    //Check out för ett task
+    //Checka ut för en uppgift, tar in id som pathvariable 
     @PostMapping("/checkout/{id}")
     public Task checkOut(@PathVariable String id){
         Optional<Task> optionalTask = taskRepository.findById(id);
@@ -57,12 +57,22 @@ public class TaskController {
         throw new RuntimeException("Uppgift hittades inte med id: " + id);
     }
 
-    //Hämtar alla denna veckans tasks
+    //Hämtar alla nuvarande veckans uppgiter
     @GetMapping("/week")
     public List<Task> getTasksThisWeek(){
+        //Hämtar datum och klockslag
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).withHour(0).withMinute(0);
-        LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY)).withHour(23).withMinute(59);
+        //Räknar ut början av vecka genom att ta dagens datum, flytta till den senaste mån/ samma dag, om 
+        //det är redan måndag och sätter klockslag till 00:00
+        LocalDateTime startOfWeek = now
+            .with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+            .withHour(0)
+            .withMinute(0);
+        //Räknar ut slutet av vecka på samma sätt, sätter klockslag 23:59
+            LocalDateTime endOfWeek = now
+            .with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
+            .withHour(23)
+            .withMinute(59);
 
         return taskRepository.findByStartTimeBetween(startOfWeek, endOfWeek);
     }
@@ -76,7 +86,7 @@ public class TaskController {
 
         List<Task> tasks = taskRepository.findByStartTimeBetween(startOfWeek, endOfWeek);
 
-        //Gruppera & summera tid per kategori
+        //Grupperar & summerar tid per kategori
         Map<String, Long> minutesPerCategoryId = tasks.stream()
             .filter(task -> task.getEndTime() != null) //Tar bara avslutade task
             .collect(Collectors.groupingBy(
@@ -99,7 +109,8 @@ public class TaskController {
             .collect(Collectors.toList());
 
     }
-    //Hämta statistik för en vald vecka, t.ex. /api/tasks/stats/week?year=2025 
+    
+    //Hämtar statistik för en vald vecka, t.ex. /api/tasks/stats/specificweek?year=2025&week=19 
     @GetMapping("/stats/specificweek")
     public List<WeeklyCategoryStat> getWeeklyStatsByYearAndWeek(@RequestParam int year, @RequestParam int week){
         //Skapar en kalender för att räkna ut veckans start & slut
