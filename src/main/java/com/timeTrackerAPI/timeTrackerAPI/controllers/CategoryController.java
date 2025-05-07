@@ -17,7 +17,6 @@ import com.timeTrackerAPI.timeTrackerAPI.repositories.CategoryRepository;
 
 @RestController
 @RequestMapping("/api/categories")
-//För att tillåta frontend senare
 @CrossOrigin(origins = "*")
 public class CategoryController {
 
