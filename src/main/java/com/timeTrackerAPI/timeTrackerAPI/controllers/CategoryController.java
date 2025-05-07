@@ -23,16 +23,19 @@ public class CategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    //Skapar en ny kategori
     @PostMapping
     public Category createCategory(@RequestBody Category category){
         return categoryRepository.save(category);
     }
 
+    //Hämtar alla tillagda kategorier
     @GetMapping
     public List<Category> getAllCategories(){
         return categoryRepository.findAll();
     }
 
+    //För att kunna redigera en kategori
     @PutMapping("/{id}")
     public Category updateCategory(@PathVariable String id, @RequestBody Category updatedCategory){
         return categoryRepository.findById(id)
