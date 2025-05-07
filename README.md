@@ -1,12 +1,13 @@
 ### Timetracker API
-Det här är ett API som byggds med Spring Boot och MongoDB för att lägga till en kategori och lägga till en uppgift. Man får en statistik hur mycket tid man har lagt på en uppgift per vecka. 
+Det här är ett API som byggds med Spring Boot och MongoDB för att skapa en kategori samt starta och avsluta en uppgift. Man får en statistik hur mycket tid man har lagt på en uppgift under veckan. Man får även välja en vecka för att se statistik för den där veckan.  
 
 ### Funktionalitet
 - Lägga till en kategori.
 - Uppdatera en kategori.
 - Lägga till en task (uppgift) och starta tiden (check in)
 - Avsluta uppgiften (checkout)
-- Får statistik om hur många minuter man har spenderat med tasken på en vecka.
+- Får statistik om hur många timmar/ minuter man har spenderat med tillagda uppgifter för nuvarande veckan.
+- Visar statistik för en vald vecka. 
 
 ### Testa i Postman
   ## Skapa kategori
@@ -34,11 +35,15 @@ Det här är ett API som byggds med Spring Boot och MongoDB för att lägga till
   }
 
 ## Checka ut
-  # POST http://localhost:8080/api/tasks/checkout/DITT_TASK_ID
+    # POST http://localhost:8080/api/tasks/checkout/DITT_TASK_ID
 
-## Hämta veckans task:
-  # GET http://localhost:8080/api/tasks/week
+## Hämta veckans task
+    # GET http://localhost:8080/api/tasks/week
   
-## Se veckans statistik
-  # GET http://localhost:8080/api/tasks/stats/week
+## Se nuvarande veckans statistik
+    # GET http://localhost:8080/api/tasks/stats/week
+
+## Se tidigara veckan statistik
+    # GET http://localhost:8080/api/tasks/stats/specificweek?year=2025&week=18
+    Obs! Det finns data tillagd bara för vecka 18 och 19.
   
